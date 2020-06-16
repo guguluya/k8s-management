@@ -4,41 +4,22 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1NamespaceList;
 import io.kubernetes.client.openapi.models.V1Pod;
 import io.kubernetes.client.openapi.models.V1PodList;
-import io.kubernetes.client.util.ClientBuilder;
 
 public class DemoNamespace {
 
     public static void main(String[] args) throws ApiException, IOException {
 
-        initConfiguration();
+        // 初始化连接
+        DemoUtil.initConfiguration();
 
         listPods();
 
         listNameSpaces();
-    }
-
-    /**
-     * 初始化连接
-     */
-    private static void initConfiguration() {
-        // token 方式连接
-//        ApiClient client = new ClientBuilder()
-//                .setBasePath("ApiServer地址")
-//                .setVerifyingSsl(false)
-//                .setAuthentication(new AccessTokenAuthentication("Token"))
-//                .build();
-
-        // 本地连接
-        ApiClient client = new ClientBuilder().setBasePath("http://localhost:8001/").setVerifyingSsl(false).build();
-
-        Configuration.setDefaultApiClient(client);
     }
 
     /**

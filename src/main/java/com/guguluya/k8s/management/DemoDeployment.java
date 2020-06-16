@@ -5,23 +5,21 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.models.V1ContainerBuilder;
 import io.kubernetes.client.openapi.models.V1ContainerPortBuilder;
 import io.kubernetes.client.openapi.models.V1Deployment;
 import io.kubernetes.client.openapi.models.V1DeploymentBuilder;
 import io.kubernetes.client.openapi.models.V1DeploymentList;
-import io.kubernetes.client.util.ClientBuilder;
 import io.kubernetes.client.util.Yaml;
 
 public class DemoDeployment {
 
     public static void main(String[] args) throws ApiException, IOException {
 
-        initConfiguration();
+        // 初始化连接
+        DemoUtil.initConfiguration();
 
         // yaml 文件方式创建 Deployment
 //        createDeploymentByYaml();
@@ -33,23 +31,6 @@ public class DemoDeployment {
 
         // Deployments 一览
         listDeployments();
-    }
-
-    /**
-     * 初始化连接
-     */
-    private static void initConfiguration() {
-        // token 方式连接
-//        ApiClient client = new ClientBuilder()
-//                .setBasePath("ApiServer地址")
-//                .setVerifyingSsl(false)
-//                .setAuthentication(new AccessTokenAuthentication("Token"))
-//                .build();
-
-        // 本地连接
-        ApiClient client = new ClientBuilder().setBasePath("http://localhost:8001/").setVerifyingSsl(false).build();
-
-        Configuration.setDefaultApiClient(client);
     }
 
     /**
