@@ -1,0 +1,128 @@
+package com.guguluya.k8s.management.models;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
+import io.kubernetes.client.openapi.ApiException;
+import io.kubernetes.client.openapi.apis.CoreV1Api;
+import io.kubernetes.client.openapi.models.V1Pod;
+import io.kubernetes.client.openapi.models.V1PodList;
+
+public class DemoNode {
+
+    /**
+     * 获取 Node 一览(根据集群的 Pod 信息)
+     */
+    public static List<String> listNodes() throws Exception {
+        CoreV1Api api = new CoreV1Api();
+
+        Set<String> nodes = new HashSet<>();
+        List<String> nameSpaces = DemoNamespace.listNameSpace();
+        for (String namespace : nameSpaces) {
+            V1PodList podList = api.listNamespacedPod(namespace, null, null, null, null, null, null, null, null, null);
+            for (V1Pod item : podList.getItems()) {
+                nodes.add(item.getSpec().getNodeName());
+            }
+        }
+
+        return new ArrayList<String>(nodes);
+    }
+
+    /**
+     * <pre>
+     * 获取指定 Node 的 Info
+     * 
+     * kubectl describe node 127.0.0.1 --v=9
+     * GET: https://localhost:6443/api/v1/nodes/127.0.0.1
+     * GET: https://localhost:6443/api/v1/pods?fieldSelector=spec.nodeName=127.0.0.1,status.phase!=Failed,status.phase!=Succeeded
+     * GET: https://localhost:6443/api/v1/events?fieldSelector=involvedObject.uid=127.0.0.1,involvedObject.name=127.0.0.1,involvedObject.namespace=,involvedObject.kind=Node
+     * </pre>
+     */
+    public static String getNodeInfo(String url, String nodeName) throws Exception {
+
+        // url: http://localhost:8001
+        // nodeName: 127.0.0.1
+        URL obj = new URL(url + "/api/v1/nodes/" + nodeName);
+        System.out.println("Request url: " + url + "/api/v1/nodes/" + nodeName);
+
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+        con.setRequestMethod("GET");
+        con.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+//        int responseCode = con.getResponseCode();
+//        System.out.println("Response Code : " + responseCode);
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuffer nodeInfo = new StringBuffer();
+        while ((inputLine = in.readLine()) != null) {
+            nodeInfo.append(inputLine);
+        }
+        in.close();
+
+        return nodeInfo.toString();
+    }
+
+    /**
+     * 获取所有的 Node 和 Pod 的 mapping
+     */
+    public static Map<String, Set<String>> getAllNodeAndPodMapping() throws ApiException {
+        CoreV1Api api = new CoreV1Api();
+
+        Map<String, Set<String>> nodePodMapping = new HashMap<>();
+        List<String> nameSpaces = DemoNamespace.listNameSpace();
+        for (String namespace : nameSpaces) {
+            V1PodList podList = api.listNamespacedPod(namespace, null, null, null, null, null, null, null, null, null);
+            for (V1Pod item : podList.getItems()) {
+                String nodeName = item.getSpec().getNodeName();
+                String podName = item.getMetadata().getName();
+                Set<String> podNames = nodePodMapping.getOrDefault(nodeName, new HashSet<String>());
+                podNames.add(podName);
+                nodePodMapping.put(nodeName, podNames);
+            }
+        }
+
+        return nodePodMapping;
+    }
+
+    public static void printAllNodeAndPodMapping(Map<String, Set<String>> nodePodMapping) {
+        System.out.println("Node and Pod mapping:");
+        for (Entry<String, Set<String>> entry : nodePodMapping.entrySet()) {
+            System.out.println("\t" + entry.getKey());
+            entry.getValue().stream().forEach(s -> System.out.println("\t\t" + s));
+        }
+    }
+
+    /**
+     * 打印 Node 一览
+     */
+    public static void printNodes(List<String> list) {
+        System.out.println("Node 一览:");
+        for (String item : list) {
+            System.out.println("\t" + item);
+        }
+    }
+
+    /**
+     * 打印 NodeInfo
+     */
+    public static void printNodeInfo(String nodeInfo) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonElement je = new JsonParser().parse(nodeInfo);
+        System.out.println("nodeInfo:\n" + gson.toJson(je));
+    }
+}

@@ -1,4 +1,4 @@
-package com.guguluya.k8s.management;
+package com.guguluya.k8s.management.models;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,37 +16,16 @@ import io.kubernetes.client.util.Yaml;
 
 public class DemoDeployment {
 
-    public static void main(String[] args) throws ApiException, IOException {
-
-        // 初始化连接
-        DemoUtil.initConfiguration();
-
-        // yaml 文件方式创建 Deployment
-//        createDeploymentByYaml();
-        System.out.println("===================");
-
-        // modal 方式创建 Deployment
-//        createDeploymentByModal();
-        System.out.println("===================");
-
-        // Deployments 一览
-        listDeployments();
-    }
-
     /**
-     * Deployments 一览
+     * 获取 Deployment 一览
      */
-    public static void listDeployments() throws ApiException {
+    public static V1DeploymentList listDeployments() throws ApiException {
         AppsV1Api api = new AppsV1Api();
-        V1DeploymentList list = api.listDeploymentForAllNamespaces(Boolean.FALSE, null, null, null, 0, "true", null, Integer.MAX_VALUE, Boolean.FALSE);
-        System.out.println("Deployments List ===================");
-        for (V1Deployment item : list.getItems()) {
-            System.out.println(item.getMetadata().getName());
-        }
+        return api.listDeploymentForAllNamespaces(Boolean.FALSE, null, null, null, 0, "true", null, Integer.MAX_VALUE, Boolean.FALSE);
     }
 
     /**
-     * * <pre>
+     * <pre>
      * 通过 yaml 文件创建 Deployment
      * 
      * Yaml:
@@ -84,52 +63,41 @@ public class DemoDeployment {
 
         System.out.println(createResult);
     }
-    
+
     /**
      * 通过 modal 创建 Deployment
      */
     public static void createDeploymentByModal() throws IOException, ApiException {
-        
+
         Map<String, String> metadataLabels = new HashMap<>();
         metadataLabels.put("app", "nginx");
-        
+
         V1Deployment deploymentBody = new V1DeploymentBuilder()
                 // apiVersion
                 .withApiVersion("apps/v1")
                 // kind
                 .withKind("Deployment")
                 // metadata
-                .withNewMetadata()
-                .withName("sample-nginx-deployment-modal")
-                .withLabels(metadataLabels)
-                .endMetadata()
+                .withNewMetadata().withName("sample-nginx-deployment-modal").withLabels(metadataLabels).endMetadata()
                 // spec
-                .withNewSpec()
-                .withNewSelector()
-                .addToMatchLabels("app", "nginx")
-                .endSelector()
-                .withReplicas(1)
-                .withNewTemplate()
-                .withNewMetadata()
-                .withLabels(metadataLabels)
-                .endMetadata()
-                .withNewSpec()
-                .withContainers(
-                        new V1ContainerBuilder()
-                            .withName("nginx")
-                            .withImage("nginx:1.14.2")
-                            .withPorts(new V1ContainerPortBuilder()
-                                .withContainerPort(80)
-                                .build())
-                        .build())
-                .endSpec()
-                .endTemplate()
-                .endSpec()
-                .build();
-        
+                .withNewSpec().withNewSelector().addToMatchLabels("app", "nginx").endSelector().withReplicas(1).withNewTemplate().withNewMetadata()
+                .withLabels(metadataLabels).endMetadata().withNewSpec().withContainers(new V1ContainerBuilder().withName("nginx").withImage("nginx:1.14.2")
+                        .withPorts(new V1ContainerPortBuilder().withContainerPort(80).build()).build())
+                .endSpec().endTemplate().endSpec().build();
+
         AppsV1Api api = new AppsV1Api();
         V1Deployment createResult = api.createNamespacedDeployment("default", deploymentBody, null, null, null);
 
         System.out.println(createResult);
+    }
+
+    /**
+     * 打印 Deployment 一览
+     */
+    public static void printDeployment(V1DeploymentList list) {
+        System.out.println("Deployment 一览:");
+        for (V1Deployment item : list.getItems()) {
+            System.out.println("\t" + item.getMetadata().getName());
+        }
     }
 }
