@@ -1,9 +1,5 @@
 package com.guguluya.k8s.management.models;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,6 +12,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.guguluya.k8s.management.DemoUtil;
 
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
@@ -56,25 +53,7 @@ public class DemoNode {
 
         // url: http://localhost:8001
         // nodeName: 127.0.0.1
-        URL obj = new URL(url + "/api/v1/nodes/" + nodeName);
-        System.out.println("Request url: " + url + "/api/v1/nodes/" + nodeName);
-
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-        con.setRequestMethod("GET");
-        con.setRequestProperty("User-Agent", "Mozilla/5.0");
-
-//        int responseCode = con.getResponseCode();
-//        System.out.println("Response Code : " + responseCode);
-
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuffer nodeInfo = new StringBuffer();
-        while ((inputLine = in.readLine()) != null) {
-            nodeInfo.append(inputLine);
-        }
-        in.close();
-
-        return nodeInfo.toString();
+        return DemoUtil.sendGetRequest(url + "/api/v1/nodes/" + nodeName);
     }
 
     /**

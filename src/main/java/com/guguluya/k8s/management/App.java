@@ -49,9 +49,13 @@ public class App {
 
         // Pod
         System.out.println("\n****** Pod");
-        // 获取 Pod 一览
+        // 获取所有 NameSpace 的 Pod 一览
         V1PodList podList = DemoPod.listPod();
         DemoPod.printPods(podList);
+        // 获取指定 Node 上的 Pod 一览
+        List<String> podInNodeList = DemoPod.listPodsInNode("http://localhost:8001", "127.0.0.1");
+        System.out.println("指定 Node 对应的 Pod 一览:");
+        podInNodeList.forEach(item -> System.out.println("\t" + item));
         // 获取指定 Pod 的日志
         DemoPod.readPodLog();
     }
