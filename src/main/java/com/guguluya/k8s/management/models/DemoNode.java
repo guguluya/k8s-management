@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import com.google.gson.Gson;
@@ -16,10 +17,30 @@ import com.guguluya.k8s.management.DemoUtil;
 
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
+import io.kubernetes.client.openapi.models.V1Node;
+import io.kubernetes.client.openapi.models.V1NodeList;
 import io.kubernetes.client.openapi.models.V1Pod;
 import io.kubernetes.client.openapi.models.V1PodList;
 
 public class DemoNode {
+
+    /**
+     * 为指定 Node 更新/添加 label
+     */
+    public static void updateNodeLabel(String nodeName, String labelKey, String labelValue) throws ApiException {
+        CoreV1Api api = new CoreV1Api();
+        V1NodeList nodeList = api.listNode(null, null, null, null, null, null, null, null, null);
+        Optional<V1Node> optionalNode = nodeList.getItems().stream().filter(node -> nodeName.equals(node.getMetadata().getName())).findFirst();
+        if (optionalNode.isPresent()) {
+            V1Node node = optionalNode.get();
+            Map<String, String> labels = node.getMetadata().getLabels();
+            labels.put(labelKey, labelValue);
+            api.replaceNode(nodeName, node, null, null, null);
+            System.out.println("指定 node 的 lable 已经更新!");
+        } else {
+            System.err.println("指定的 node 不存在!");
+        }
+    }
 
     /**
      * 获取 Node 一览(根据集群的 Pod 信息)

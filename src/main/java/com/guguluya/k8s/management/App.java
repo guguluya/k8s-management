@@ -19,6 +19,12 @@ public class App {
         // 初始化连接
         DemoUtil.initConfiguration();
 
+//        excute();
+        DemoNode.updateNodeLabel("10.144.213.190", "testKey", "testValue");
+    }
+
+    public static void excute() throws Exception {
+
         // Deployment
         System.out.println("\n****** Deployment");
         // 获取 Deployment 一览
@@ -46,6 +52,8 @@ public class App {
         // 获取指定 Node 的 Info
         String nodeInfo = DemoNode.getNodeInfo("http://localhost:8001", "127.0.0.1");
         DemoNode.printNodeInfo(nodeInfo);
+        // 为指定的 Node 更新/添加 label
+        DemoNode.updateNodeLabel("nodeName", "testKey", "testValue");
 
         // Pod
         System.out.println("\n****** Pod");
@@ -59,5 +67,4 @@ public class App {
         // 获取指定 Pod 的日志
         DemoPod.readPodLog();
     }
-
 }
