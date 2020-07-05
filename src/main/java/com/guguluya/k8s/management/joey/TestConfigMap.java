@@ -10,7 +10,6 @@ import com.guguluya.k8s.management.DemoUtil;
 
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
-import io.kubernetes.client.openapi.Configuration;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
 import io.kubernetes.client.openapi.apis.CoreV1Api;
 import io.kubernetes.client.openapi.models.V1ConfigMap;
@@ -51,7 +50,6 @@ public class TestConfigMap {
 		body.setMetadata(metadata);
 
 		ApiClient client = Config.defaultClient();
-		// Configuration.setDefaultApiClient(client);
 		CoreV1Api api = new CoreV1Api(client);
 		api.createNamespacedConfigMap("default", body, null, null, null);
 	}
